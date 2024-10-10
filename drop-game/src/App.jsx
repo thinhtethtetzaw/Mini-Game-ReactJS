@@ -110,21 +110,29 @@ function App() {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
-    for (let i = iconsRef.current.length - 1; i >= 0; i--) {
-      const icon = iconsRef.current[i];
+    let clickedBomb = false;
+    let clickedIcons = 0;
+
+    iconsRef.current = iconsRef.current.filter(icon => {
       const iconCenterX = icon.x + ICON_SIZE / 2;
       const iconCenterY = icon.y + ICON_SIZE / 2;
       const distance = Math.sqrt(Math.pow(x - iconCenterX, 2) + Math.pow(y - iconCenterY, 2));
       
       if (distance <= (ICON_SIZE * HIT_AREA_MULTIPLIER) / 2) {
         if (icon.type === 'bomb') {
-          setGameOver(true);
+          clickedBomb = true;
         } else {
-          setScore(prevScore => prevScore + 1);
+          clickedIcons++;
         }
-        iconsRef.current.splice(i, 1);
-        break;
+        return false; // Remove the clicked icon
       }
+      return true; // Keep unclicked icons
+    });
+
+    if (clickedBomb) {
+      setGameOver(true);
+    } else if (clickedIcons > 0) {
+      setScore(prevScore => prevScore + clickedIcons);
     }
   };
 
