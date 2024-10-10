@@ -61,8 +61,11 @@ function App() {
       
       iconsRef.current = iconsRef.current.filter(icon => icon.y < GAME_HEIGHT);
       
+      const baseSpeed = 2;
+      const currentSpeed = baseSpeed + score * 0.05;
+      
       iconsRef.current.forEach(icon => {
-        icon.y += 2 + score * 0.05;
+        icon.y += currentSpeed; // Use currentSpeed here instead of the fixed value
         
         // Calculate the center position for both the icon and the stroke
         const centerX = icon.x + ICON_SIZE / 2;
@@ -113,23 +116,26 @@ function App() {
     let clickedBomb = false;
     let clickedIcons = 0;
 
-    const predictiveOffset = 10 + score * 0.1; // Increase this value for more leniency
+    // const baseSpeed = 2;
+    // const currentSpeed = baseSpeed + score * 0.05;
+    const predictiveOffset = 10 + score * 0.2; // Increased from 0.1 to 0.2
+    const verticalHitAreaExtension = Math.min(ICON_SIZE, predictiveOffset * 2); // Limit the extension
 
     iconsRef.current = iconsRef.current.filter(icon => {
       const iconCenterX = icon.x + ICON_SIZE / 2;
       const iconCenterY = icon.y + ICON_SIZE / 2;
       
-      // Check current position
-      let distance = Math.sqrt(Math.pow(x - iconCenterX, 2) + Math.pow(y - iconCenterY, 2));
+      // Extend hit area upwards
+      const extendedIconTopY = iconCenterY - verticalHitAreaExtension;
       
-      // Check slightly ahead of current position
-      const futureIconCenterY = iconCenterY + predictiveOffset;
-      const futureDistance = Math.sqrt(Math.pow(x - iconCenterX, 2) + Math.pow(y - futureIconCenterY, 2));
+      // Check current position and extended area
+      const distanceToCenter = Math.sqrt(Math.pow(x - iconCenterX, 2) + Math.pow(y - iconCenterY, 2));
+      const distanceToExtendedTop = Math.sqrt(Math.pow(x - iconCenterX, 2) + Math.pow(y - extendedIconTopY, 2));
       
       // Use the smaller of the two distances
-      distance = Math.min(distance, futureDistance);
+      const distance = Math.min(distanceToCenter, distanceToExtendedTop);
       
-      const hitAreaSize = (ICON_SIZE * HIT_AREA_MULTIPLIER) / 2 + 5; // Slightly larger hit area
+      const hitAreaSize = (ICON_SIZE * HIT_AREA_MULTIPLIER) / 2 + 5 + (score * 0.5); // Gradually increase hit area with score
       
       if (distance <= hitAreaSize) {
         if (icon.type === 'bomb') {
