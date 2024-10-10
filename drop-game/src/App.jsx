@@ -113,12 +113,25 @@ function App() {
     let clickedBomb = false;
     let clickedIcons = 0;
 
+    const predictiveOffset = 10 + score * 0.1; // Increase this value for more leniency
+
     iconsRef.current = iconsRef.current.filter(icon => {
       const iconCenterX = icon.x + ICON_SIZE / 2;
       const iconCenterY = icon.y + ICON_SIZE / 2;
-      const distance = Math.sqrt(Math.pow(x - iconCenterX, 2) + Math.pow(y - iconCenterY, 2));
       
-      if (distance <= (ICON_SIZE * HIT_AREA_MULTIPLIER) / 2) {
+      // Check current position
+      let distance = Math.sqrt(Math.pow(x - iconCenterX, 2) + Math.pow(y - iconCenterY, 2));
+      
+      // Check slightly ahead of current position
+      const futureIconCenterY = iconCenterY + predictiveOffset;
+      const futureDistance = Math.sqrt(Math.pow(x - iconCenterX, 2) + Math.pow(y - futureIconCenterY, 2));
+      
+      // Use the smaller of the two distances
+      distance = Math.min(distance, futureDistance);
+      
+      const hitAreaSize = (ICON_SIZE * HIT_AREA_MULTIPLIER) / 2 + 5; // Slightly larger hit area
+      
+      if (distance <= hitAreaSize) {
         if (icon.type === 'bomb') {
           clickedBomb = true;
         } else {
