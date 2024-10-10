@@ -10,9 +10,8 @@ function App() {
   const animationRef = useRef(null);
   const lastDropTimeRef = useRef(0);
   const backgroundRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
 
-  const GAME_WIDTH = 800;
-  const GAME_HEIGHT = 600;
   const ICON_SIZE = 40;
   const HIT_AREA_MULTIPLIER = 1.5;
   const MAX_ICONS = 10;
@@ -20,9 +19,20 @@ function App() {
   const PADDING = 50;
 
   useEffect(() => {
+    const updateDimensions = () => {
+      setDimensions({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
-    canvas.width = GAME_WIDTH;
-    canvas.height = GAME_HEIGHT;
+    canvas.width = dimensions.width;
+    canvas.height = dimensions.height;
     const ctx = canvas.getContext('2d');
 
     // Load background image
@@ -37,7 +47,7 @@ function App() {
         if (currentTime - lastDropTimeRef.current > dropInterval) {
           const newIcon = {
             id: Math.random(),
-            x: PADDING + Math.random() * (GAME_WIDTH - 2 * PADDING - ICON_SIZE),
+            x: PADDING + Math.random() * (dimensions.width - 2 * PADDING - ICON_SIZE),
             y: 0,
             type: Math.random() > 0.8 ? 'bomb' : 'icon',
           };
@@ -48,36 +58,61 @@ function App() {
     };
 
     const animate = (currentTime) => {
-      ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+      ctx.clearRect(0, 0, dimensions.width, dimensions.height);
       
-      // Draw background image
+      // Draw background image with cover sizing
       if (backgroundRef.current) {
-        ctx.drawImage(backgroundRef.current, 0, 0, GAME_WIDTH, GAME_HEIGHT);
+        const imgAspectRatio = backgroundRef.current.width / backgroundRef.current.height;
+        const canvasAspectRatio = dimensions.width / dimensions.height;
+        let drawWidth, drawHeight, drawX, drawY;
+
+        if (canvasAspectRatio > imgAspectRatio) {
+          drawWidth = dimensions.width;
+          drawHeight = dimensions.width / imgAspectRatio;
+          drawX = 0;
+          drawY = (dimensions.height - drawHeight) / 2;
+        } else {
+          drawHeight = dimensions.height;
+          drawWidth = dimensions.height * imgAspectRatio;
+          drawX = (dimensions.width - drawWidth) / 2;
+          drawY = 0;
+        }
+
+        ctx.drawImage(backgroundRef.current, drawX, drawY, drawWidth, drawHeight);
       }
-      
-      // Remove the padding areas drawing code if you don't want them anymore
       
       addIcon(currentTime);
       
-      iconsRef.current = iconsRef.current.filter(icon => icon.y < GAME_HEIGHT);
+      let gameOverDueToStar = false;
+      
+      iconsRef.current = iconsRef.current.filter(icon => {
+        if (icon.y + ICON_SIZE >= dimensions.height) {
+          if (icon.type === 'icon') {
+            gameOverDueToStar = true;
+          }
+          return false;
+        }
+        return true;
+      });
+      
+      if (gameOverDueToStar) {
+        setGameOver(true);
+      }
       
       const baseSpeed = 2;
       const currentSpeed = baseSpeed + score * 0.05;
       
       iconsRef.current.forEach(icon => {
-        icon.y += currentSpeed; // Use currentSpeed here instead of the fixed value
+        icon.y += currentSpeed;
         
-        // Calculate the center position for both the icon and the stroke
         const centerX = icon.x + ICON_SIZE / 2;
         const centerY = icon.y + ICON_SIZE / 2;
         
-        // Draw the stroke
         ctx.beginPath();
         ctx.arc(centerX, centerY, (ICON_SIZE * HIT_AREA_MULTIPLIER) / 2, 0, 2 * Math.PI);
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.stroke();
         
-        // Draw the icon
         ctx.font = '30px Arial';
         ctx.fillStyle = icon.type === 'bomb' ? 'red' : 'gold';
         ctx.textAlign = 'center';
@@ -95,7 +130,7 @@ function App() {
     return () => {
       cancelAnimationFrame(animationRef.current);
     };
-  }, [gameOver, score]);
+  }, [gameOver, score, dimensions]);
 
   const handleCanvasClick = (event) => {
     if (gameOver) {
@@ -155,16 +190,38 @@ function App() {
     }
   };
 
+  const restartGame = () => {
+    setGameOver(false);
+    setScore(0);
+    iconsRef.current = [];
+    lastDropTimeRef.current = 0;
+  };
+
   return (
-    <div className="game-container">
-      <h1>Drop and Catch Game</h1>
-      <h2>Score: {score}</h2>
-      {gameOver && <h2>Game Over! Click to Restart</h2>}
+    <div className="relative w-screen h-screen overflow-hidden">
       <canvas
         ref={canvasRef}
         onClick={handleCanvasClick}
-        className="game-area"
+        className="w-full h-full touch-none"
       />
+      <div className="absolute top-5 left-5 text-white text-shadow">
+        <h2 className="text-2xl font-bold mb-2">Drop and Catch Game</h2>
+        <h4 className="text-lg">Score: {score}</h4>
+      </div>
+      {gameOver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="w-[300px] bg-white p-4 rounded-lg text-center shadow-lg">
+            <h2 className="text-2xl font-bold mb-4">Game Over!</h2>
+            <p className="text-xl mb-6">Your Score: {score}</p>
+            <button 
+              onClick={restartGame}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-200"
+            >
+              Restart
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
