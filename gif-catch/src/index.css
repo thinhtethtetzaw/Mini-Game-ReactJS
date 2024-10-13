@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your custom styles and animations go here */
+
+@keyframes moveLeftToRight {
+  0% {
+    left: 0%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes moveRightToLeft {
+  0% {
+    right: 0%;
+  }
+  100% {
+    right: 100%;
+  }
+}
+
+
+.animate-move-left-right {
+  animation: moveLeftToRight 2s linear infinite;
+  animation-direction: alternate-reverse;
+}
+
+.animate-move-right-left {
+  animation: moveRightToLeft 2s linear infinite;
+  animation-direction: alternate-reverse;
+}
