@@ -14,6 +14,7 @@ const FlipBottle = () => {
   const [message, setMessage] = useState(""); // Message to show if bottle stands
   const animationFrameId = useRef(null); // Ref to store the animation frame ID
   const bottleImage = useRef(new Image());
+  const backgroundImage = useRef(new Image()); // New ref for background image
 
   const isBottleNearUpright = () => {
     // Check if the bottle rotation is close to upright
@@ -32,26 +33,15 @@ const FlipBottle = () => {
     bottleY.current = Math.floor(canvas.height * 4 / 5);
 
     const drawBackground = () => {
-      // Draw blue radial gradient background
-      const gradient = ctx.createRadialGradient(250, canvas.height / 2, 0, 250, canvas.height / 2, 500);
-      gradient.addColorStop(0, '#0066cc');
-      gradient.addColorStop(1, '#003366');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Draw full-background.png
+      backgroundImage.current.src = '/images/full-background.png';
+      ctx.drawImage(backgroundImage.current, 0, 0, canvas.width, canvas.height);
 
       // Draw wooden surface at the bottom (now at 3/4 of the canvas height)
-      ctx.fillStyle = '#8B4513';
-      ctx.fillRect(0, Math.floor(canvas.height * 3 / 4), canvas.width, canvas.height / 4);
+      // ctx.fillStyle = '#8B4513';
+      // ctx.fillRect(0, Math.floor(canvas.height * 3 / 4), canvas.width, canvas.height / 4);
     };
 
-    const drawLogo = () => {
-      ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 24px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('GRAND ROYAL', canvas.width / 2, 40);
-      ctx.font = 'italic 18px Arial';
-      ctx.fillText('Signature', canvas.width / 2, 65);
-    };
 
     const drawBottle = () => {
       ctx.save();
@@ -65,7 +55,6 @@ const FlipBottle = () => {
     const gameLoop = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawBackground();
-      drawLogo();
 
       if (flipping.current) {
         bottleRotation.current += flipSpeed.current;
@@ -158,7 +147,6 @@ const FlipBottle = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-white">
-      {/* <div className="text-slate-200 text-4xl font-bold mb-10">FLIP THE BOTTLE!</div> */}
       <canvas
         ref={canvasRef}
         className="shadow-lg"
