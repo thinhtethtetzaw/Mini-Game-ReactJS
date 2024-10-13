@@ -66,24 +66,33 @@ function App() {
   }, [isAnimating]);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden flex items-center justify-center bg-[url('/bg.jpg')] bg-cover bg-center">
+    <div className="relative w-[500px] h-screen overflow-hidden flex items-center justify-center mx-auto bg-[url('/bg-with-light.png')] bg-contain bg-center bg-no-repeat">
+      <div className='mt-[8.5rem]'>
+        <img 
+          ref={topRectRef}
+          src={'/bottlePieces/top.png'}
+          className={`w-[5.5rem] absolute z-10 translate-y-[-113.4px] ${isAnimating ? 'animate-move-right-left' : ''}`}
+          // className={`w-[5.5rem] absolute z-10 translate-y-[-113.4px] ${isAnimating ? '' : ''}`}
+        />
+        <img 
+          ref={middleRectRef}
+          src={'/bottlePieces/middle.png'}
+          className={`w-[5.5rem] absolute z-10  ${isAnimating ? 'animate-move-left-right' : ''}`}
+          // className={`w-[5.5rem] absolute z-10  ${isAnimating ? '' : ''}`}
+        />
+        <img 
+          ref={BottomRectRef}
+          src={'/bottlePieces/bottom.png'}
+          className={`w-[5.5rem] absolute z-10 translate-y-[106px] ${isAnimating ? 'animate-move-right-left' : ''}`}
+          // className={`w-[5.5rem] absolute z-10 translate-y-[106px] ${isAnimating ? '' : ''}`}
+        />
+      </div>  
+      <div ref={caughtAreaRef} className="w-[5.5rem] h-80 translate-y-[7.5rem]"></div>
       <img 
-        ref={topRectRef}
-        src={'/bottlePieces/top.png'}
-        className={`size-32 absolute z-10 translate-y-[-8rem] ${isAnimating ? 'animate-move-right-left' : ''}`}
-      />
-      <img 
-        ref={middleRectRef}
-        src={'/bottlePieces/middle.png'}
-        className={`size-32 absolute z-10  ${isAnimating ? 'animate-move-left-right' : ''}`}
-      />
-      <img 
-        ref={BottomRectRef}
-        src={'/bottlePieces/bottom.png'}
-        className={`size-32 absolute z-10 translate-y-[8rem] ${isAnimating ? 'animate-move-right-left' : ''}`}
+        src={'/bottlePieces/frame1.png'}
+        className="w-[6.3rem] h-[315.5px] absolute z-20 translate-y-[6.6rem]"
       />
       
-      <div ref={caughtAreaRef} className="size-32 z-20"></div>
       {isInside && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded z-30">
           Congratulations! You caught the bottle!

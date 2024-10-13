@@ -54,7 +54,7 @@ const FlipBottle = () => {
       ctx.save();
       ctx.translate(200, bottleY.current);
       ctx.rotate(bottleRotation.current);
-      bottleImage.current.src = '/bottle.png'; 
+      bottleImage.current.src = '/grand-royal-bottle.png'; 
       ctx.drawImage(bottleImage.current, -80, -130, 180, 200);
       ctx.restore();
     };

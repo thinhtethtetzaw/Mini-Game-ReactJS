@@ -24,11 +24,11 @@
 
 
 .animate-move-left-right {
-  animation: moveLeftToRight 2s linear infinite;
+  animation: moveLeftToRight 1s linear infinite;
   animation-direction: alternate-reverse;
 }
 
 .animate-move-right-left {
-  animation: moveRightToLeft 2s linear infinite;
+  animation: moveRightToLeft 1s linear infinite;
   animation-direction: alternate-reverse;
 }
