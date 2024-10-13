@@ -94,14 +94,14 @@ function App() {
       />
       
       {isInside && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded z-30">
-          Congratulations! You caught the bottle!
+        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 text-white text-center bg-white border border-white border-opacity-20 bg-opacity-20 p-2 px-4 rounded-lg text-nowrap">
+          Congratulations! <br /> You caught the bottle.
         </div>
       )}
       {!isInside && !isAnimating && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded z-30">
-          Sorry! You missed the bottle. Try again
-        </div>
+         <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 text-white text-center bg-red-500 border border-white border-opacity-20 bg-opacity-20 p-2 px-4 rounded-lg">
+        You missed the bottle. <br /> Try again!
+       </div>
       )}
     </div>
   )

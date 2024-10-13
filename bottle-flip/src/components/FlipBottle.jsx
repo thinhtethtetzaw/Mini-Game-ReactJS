@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 const FlipBottle = () => {
   const canvasRef = useRef(null);
   const bottleRotation = useRef(0);
-  const bottleY = useRef(400);
+  const bottleY = useRef(0); // We'll set this dynamically in useEffect
   const flipping = useRef(false);
   const falling = useRef(false); // New ref to detect falling state
   const flipSpeed = useRef(0);
@@ -25,20 +25,23 @@ const FlipBottle = () => {
     const ctx = canvas.getContext("2d");
 
     // Update canvas size
-    canvas.width = 400;
-    canvas.height = 600;
+    canvas.width = 500;
+    canvas.height = window.innerHeight;
+
+    // Set initial bottle position to 4/5 of the canvas height
+    bottleY.current = Math.floor(canvas.height * 4 / 5);
 
     const drawBackground = () => {
       // Draw blue radial gradient background
-      const gradient = ctx.createRadialGradient(200, 300, 0, 200, 300, 400);
+      const gradient = ctx.createRadialGradient(250, canvas.height / 2, 0, 250, canvas.height / 2, 500);
       gradient.addColorStop(0, '#0066cc');
       gradient.addColorStop(1, '#003366');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw wooden surface at the bottom
+      // Draw wooden surface at the bottom (now at 3/4 of the canvas height)
       ctx.fillStyle = '#8B4513';
-      ctx.fillRect(0, 300, canvas.width, 300);
+      ctx.fillRect(0, Math.floor(canvas.height * 3 / 4), canvas.width, canvas.height / 4);
     };
 
     const drawLogo = () => {
@@ -52,10 +55,10 @@ const FlipBottle = () => {
 
     const drawBottle = () => {
       ctx.save();
-      ctx.translate(200, bottleY.current);
+      ctx.translate(250, bottleY.current);
       ctx.rotate(bottleRotation.current);
       bottleImage.current.src = '/grand-royal-bottle.png'; 
-      ctx.drawImage(bottleImage.current, -80, -130, 180, 200);
+      ctx.drawImage(bottleImage.current, -90, -150, 180, 200);
       ctx.restore();
     };
 
@@ -70,8 +73,8 @@ const FlipBottle = () => {
         verticalSpeed.current += gravity;
         flipSpeed.current *= friction; // Apply friction to slow down rotation
 
-        if (bottleY.current >= 400) {
-          bottleY.current = 400;
+        if (bottleY.current >= Math.floor(canvas.height * 4 / 5)) {
+          bottleY.current = Math.floor(canvas.height * 4 / 5);
           flipping.current = false;
           verticalSpeed.current = 0;
 
@@ -134,7 +137,7 @@ const FlipBottle = () => {
   const resetGame = () => {
     // Reset all state and variables
     bottleRotation.current = 0;
-    bottleY.current = 400;
+    bottleY.current = Math.floor(canvasRef.current.height * 4 / 5);
     flipping.current = false;
     falling.current = false; // Reset the falling state
     verticalSpeed.current = 0;
@@ -154,11 +157,12 @@ const FlipBottle = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-blue-900">
-      <div className="text-slate-200 text-4xl font-bold mb-10">FLIP THE BOTTLE!</div>
+    <div className="flex flex-col items-center justify-center h-screen bg-white">
+      {/* <div className="text-slate-200 text-4xl font-bold mb-10">FLIP THE BOTTLE!</div> */}
       <canvas
         ref={canvasRef}
-        className="rounded-lg shadow-lg"
+        className="shadow-lg"
+        style={{ width: '500px', height: '100vh' }}
       />
       {message && (
         <div className="absolute bg-white p-4 rounded shadow-lg">
