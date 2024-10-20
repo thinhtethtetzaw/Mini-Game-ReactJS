@@ -20,14 +20,14 @@ function App() {
   const BOMB_ASPECT_RATIO = 0.6; // Changed from 1 to 0.8 to make bombs taller
   const BOTTLE_ASPECT_RATIO = 0.3;
   const BOTTLE_SIZE_MULTIPLIER = 0.5;
-  const BOMB_SIZE_MULTIPLIER = 0.5;
+  const BOMB_SIZE_MULTIPLIER = 0.7;
   const HIT_AREA_MULTIPLIER = 1.2;
   const VERTICAL_OFFSET_MULTIPLIER = 0.5;
   const MAX_ICONS = 10;
   const INITIAL_DROP_INTERVAL = 1000;
   const PADDING = 50;
   const BOMB_PROBABILITY = 0.2; // 20% chance for bombs
-  const UNCORRECT_BOTTLE_PROBABILITY = 0.2; // Decreased to 20% chance for uncorrect bottles
+  const UNCORRECT_BOTTLE_PROBABILITY = 0.3; // Decreased to 20% chance for uncorrect bottles
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -79,23 +79,66 @@ function App() {
       if (!gameOver && iconsRef.current.length < MAX_ICONS) {
         const dropInterval = Math.max(INITIAL_DROP_INTERVAL - score * 10, 200);
         if (currentTime - lastDropTimeRef.current > dropInterval) {
-          const random = Math.random();
-          let type;
-          if (random < BOMB_PROBABILITY) {
-            type = 'bomb';
-          } else if (random < BOMB_PROBABILITY + UNCORRECT_BOTTLE_PROBABILITY) {
-            type = 'uncorrect-bottle';
-          } else {
-            type = 'correct-bottle';
+          const numberOfIcons = Math.floor(Math.random() * 3) + 1; // Random number between 1 and 3
+          
+          const newIcons = [];
+          const usedPositions = [];
+          let bombCount = 0;
+          let correctBottleCount = 0;
+          let uncorrectBottleCount = 0;
+          
+          for (let i = 0; i < numberOfIcons; i++) {
+            let type;
+            const random = Math.random();
+            
+            // Adjust probabilities based on existing icons in this row
+            if (random < BOMB_PROBABILITY && bombCount < 1) {
+              type = 'bomb';
+              bombCount++;
+            } else if (random < BOMB_PROBABILITY + UNCORRECT_BOTTLE_PROBABILITY && uncorrectBottleCount < 1) {
+              type = 'uncorrect-bottle';
+              uncorrectBottleCount++;
+            } else if (correctBottleCount < 2) {
+              type = 'correct-bottle';
+              correctBottleCount++;
+            } else {
+              // If we've reached limits, choose a random type
+              const remainingTypes = ['bomb', 'uncorrect-bottle', 'correct-bottle'].filter(t => 
+                (t === 'bomb' && bombCount < 1) ||
+                (t === 'uncorrect-bottle' && uncorrectBottleCount < 1) ||
+                (t === 'correct-bottle' && correctBottleCount < 2)
+              );
+              type = remainingTypes[Math.floor(Math.random() * remainingTypes.length)];
+              if (type === 'bomb') bombCount++;
+              else if (type === 'uncorrect-bottle') uncorrectBottleCount++;
+              else correctBottleCount++;
+            }
+            
+            // Divide the screen width into sections
+            const sectionWidth = (dimensions.width - 2 * PADDING) / numberOfIcons;
+            
+            // Generate a random x position within the icon's section
+            let x;
+            do {
+              x = PADDING + (i * sectionWidth) + Math.random() * (sectionWidth - ICON_SIZE);
+            } while (usedPositions.some(pos => Math.abs(pos - x) < ICON_SIZE));
+            
+            usedPositions.push(x);
+            
+            // Set y position to just above the top of the screen
+            const y = -ICON_SIZE;
+            
+            const newIcon = {
+              id: Math.random(),
+              x: x,
+              y: y,
+              type: type,
+              imageIndex: type === 'uncorrect-bottle' ? Math.floor(Math.random() * 4) : null,
+            };
+            newIcons.push(newIcon);
           }
-          const newIcon = {
-            id: Math.random(),
-            x: PADDING + Math.random() * (dimensions.width - 2 * PADDING - ICON_SIZE),
-            y: 0,
-            type: type,
-            imageIndex: type === 'uncorrect-bottle' ? Math.floor(Math.random() * 4) : null,
-          };
-          iconsRef.current.push(newIcon);
+          
+          iconsRef.current = [...iconsRef.current, ...newIcons];
           lastDropTimeRef.current = currentTime;
         }
       }
@@ -279,7 +322,7 @@ function App() {
 
   return (
     <div className="flex justify-center items-center w-screen h-screen overflow-hidden bg-gray-200">
-      <div className="relative w-[500px] h-full">
+      <div className="relative max-w-[500px] w-full h-full">
         <canvas
           ref={canvasRef}
           onClick={handleCanvasClick}
